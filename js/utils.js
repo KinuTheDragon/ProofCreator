@@ -400,25 +400,32 @@ function setProofError(error) {
 }
 
 function setProofStatus(text) {
-    document.getElementById("proofStatus").innerText = text;
+    const proofStatus = document.getElementById("proofStatus");
+    if (proofStatus.innerText !== text)
+        proofStatus.innerText = text;
 }
 
 function updateProofStatus() {
-    setProofStatus("Valid!");
-    if (nodes.some(x => x && x.type === "output" && !getNodeOutput(x)))
-        setProofError("Invalid proof");
-    if (nodes.some(x => x && intersectsAssumption(x)))
-        setProofError("Intersecting with assumption");
+    setProofStatus(getNewProofStatus());
+}
+
+function getNewProofStatus() {
     if (nodes.some(x => x && x.type === "premise" && getAssumptionsFor(x).length))
-        setProofError("Premise inside assumption");
+        return "Premise inside assumption";
     if (nodes.some(x => x && x.type === "output" && getAssumptionsFor(x).length))
-        setProofError("Output inside assumption");
+        return "Output inside assumption";
     if (nodes.some(x => x &&
                         x.type === "output" &&
                         getNodeOutput(x) &&
                         postfixToText(getNodeOutput(x)).includes(ASSUMING)))
-        setProofError("Output has assumption operator");
+        return "Output has assumption operator";
+    if (nodes.some(x => x && intersectsAssumption(x)))
+        return "Intersecting with assumption";
+    if (nodes.some(x => x && x.type === "output" && !getNodeOutput(x)))
+        return "Invalid proof";
+    return "Valid!";
 }
+
 setInterval(updateProofStatus, UPDATE_RATE);
 
 function isValidProof() {
