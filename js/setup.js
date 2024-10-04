@@ -24,6 +24,6 @@ document.addEventListener("mousedown", event => {
     mouseLastClickWasShift = event.shiftKey;
 });
 document.addEventListener("mouseup", event => {mouseIsDown = false;});
-document.addEventListener("contextmenu", event => event.preventDefault());
+canvas.addEventListener("contextmenu", event => event.preventDefault());
 
 ctx.font = `${FONT_SIZE * UPSCALE}px Noto Sans`;
