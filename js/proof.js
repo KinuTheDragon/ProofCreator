@@ -50,7 +50,7 @@ function getProof() {
         spaced.push(line);
         lastWasDedent = line.type === "dedent";
     }
-    return proof;
+    return spaced;
 }
 
 function stringifyProof(proof) {

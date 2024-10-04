@@ -63,36 +63,38 @@ function getNodeOutputTo(from, to) {
     return rawOutput;
 }
 
+let cache = {};
 function getNodeOutput(node) {
+    if (cache[node.id]) return cache[node.id];
     if (isLoop(node)) return null;
     switch (node.type) {
         case "premise":
         case "assumption":
-            return node.postfix;
+            return cache[node.id] = node.postfix;
         case "reiteration":
-            return node.input !== null ? getNodeOutputTo(nodes[node.input], node) : null;
+            return cache[node.id] = node.input !== null ? getNodeOutputTo(nodes[node.input], node) : null;
         case "conjunctionIntroduction": {
             if (node.input1 === null) return null;
             if (node.input2 === null) return null;
             let output1 = getNodeOutputTo(nodes[node.input1], node);
             let output2 = getNodeOutputTo(nodes[node.input2], node);
             if (!output1 || !output2) return null;
-            return [output1, output2, AND];
+            return cache[node.id] = [output1, output2, AND];
         }
         case "conjunctionEliminationLeft": {
             if (node.input === null) return null;
             let output = getNodeOutputTo(nodes[node.input], node);
-            return output && output.at(-1) === AND ? output[0] : null;
+            return cache[node.id] = (output && output.at(-1) === AND ? output[0] : null);
         }
         case "conjunctionEliminationRight": {
             if (node.input === null) return null;
             let output = getNodeOutputTo(nodes[node.input], node);
-            return output && output.at(-1) === AND ? output[1] : null;
+            return cache[node.id] = (output && output.at(-1) === AND ? output[1] : null);
         }
         case "implicationIntroduction": {
             if (node.input === null) return null;
             let output = getNodeOutputTo(nodes[node.input], node);
-            return output && output.at(-1) === ASSUMING ? [output[1], output[0], IMPLIES] : null;
+            return cache[node.id] = (output && output.at(-1) === ASSUMING ? [output[1], output[0], IMPLIES] : null);
         }
         case "implicationElimination": {
             if (node.input1 === null) return null;
@@ -102,7 +104,7 @@ function getNodeOutput(node) {
             if (!output1 || !output2) return null;
             if (output1.at(-1) !== IMPLIES) return null;
             if (!postfixEquals(output1[0], output2)) return null;
-            return output1[1];
+            return cache[node.id] = output1[1];
         }
         case "biconditionalIntroduction": {
             if (node.input1 === null) return null;
@@ -116,7 +118,7 @@ function getNodeOutput(node) {
             let phi = output1[1];
             if (!postfixEquals(output2[0], phi)) return null;
             if (!postfixEquals(output2[1], psi)) return null;
-            return [phi, psi, BICONDITIONAL];
+            return cache[node.id] = [phi, psi, BICONDITIONAL];
         }
         case "biconditionalEliminationLeft": {
             if (node.input1 === null) return null;
@@ -126,7 +128,7 @@ function getNodeOutput(node) {
             if (!output1 || !output2) return null;
             if (output1.at(-1) !== BICONDITIONAL) return null;
             if (!postfixEquals(output1[0], output2)) return null;
-            return output1[1];
+            return cache[node.id] = output1[1];
         }
         case "biconditionalEliminationRight": {
             if (node.input1 === null) return null;
@@ -136,17 +138,17 @@ function getNodeOutput(node) {
             if (!output1 || !output2) return null;
             if (output1.at(-1) !== BICONDITIONAL) return null;
             if (!postfixEquals(output1[1], output2)) return null;
-            return output1[0];
+            return cache[node.id] = output1[0];
         }
         case "disjunctionIntroductionLeft": {
             if (node.input === null) return null;
             let output = getNodeOutputTo(nodes[node.input], node);
-            return [output, node.other, OR];
+            return cache[node.id] = [output, node.other, OR];
         }
         case "disjunctionIntroductionRight": {
             if (node.input === null) return null;
             let output = getNodeOutputTo(nodes[node.input], node);
-            return [node.other, output, OR];
+            return cache[node.id] = [node.other, output, OR];
         }
         case "disjunctionElimination": {
             if (node.input1 === null) return null;
@@ -165,7 +167,7 @@ function getNodeOutput(node) {
             if (!postfixEquals(output3[1], psi)) return null;
             let chi = output2[0];
             if (!postfixEquals(output3[0], chi)) return null;
-            return chi;
+            return cache[node.id] = chi;
         }
         case "negationIntroduction": {
             if (node.input === null) return null;
@@ -173,7 +175,7 @@ function getNodeOutput(node) {
             if (!output) return null;
             if (output.at(-1) !== ASSUMING) return null;
             if (!postfixEquals(output[0], CONTRADICTION)) return null;
-            return [output[1], NOT];
+            return cache[node.id] = [output[1], NOT];
         }
         case "negationElimination": {
             if (node.input1 === null) return null;
@@ -183,7 +185,7 @@ function getNodeOutput(node) {
             if (!output1 || !output2) return null;
             if (output2.at(-1) !== NOT) return null;
             if (!postfixEquals(output1, output2[0])) return null;
-            return CONTRADICTION;
+            return cache[node.id] = CONTRADICTION;
         }
         case "indirectProof": {
             if (node.input === null) return null;
@@ -192,12 +194,14 @@ function getNodeOutput(node) {
             if (output.at(-1) !== ASSUMING) return null;
             if (!postfixEquals(output[0], CONTRADICTION)) return null;
             if (output[1].at(-1) !== NOT) return null;
-            return output[1][0];
+            return cache[node.id] = output[1][0];
         }
         case "explosion":
-            return node.input === null ? null :
-                   !postfixEquals(getNodeOutputTo(nodes[node.input], node), CONTRADICTION) ? null :
-                   node.output;
+            return cache[node.id] = (
+                node.input === null ? null :
+                !postfixEquals(getNodeOutputTo(nodes[node.input], node), CONTRADICTION) ? null :
+                node.output
+            );
         case "disjunctiveSyllogismLeft": {
             if (node.input1 === null) return null;
             if (node.input2 === null) return null;
@@ -209,7 +213,7 @@ function getNodeOutput(node) {
             let phi = output1[0];
             let psi = output1[1];
             if (!postfixEquals(output2[0], phi)) return null;
-            return psi;
+            return cache[node.id] = psi;
         }
         case "disjunctiveSyllogismRight": {
             if (node.input1 === null) return null;
@@ -222,7 +226,7 @@ function getNodeOutput(node) {
             let phi = output1[0];
             let psi = output1[1];
             if (!postfixEquals(output2[0], psi)) return null;
-            return phi;
+            return cache[node.id] = phi;
         }
         case "modusTollens": {
             if (node.input1 === null) return null;
@@ -235,7 +239,7 @@ function getNodeOutput(node) {
             let phi = output1[0];
             let psi = output1[1];
             if (!postfixEquals(output2[0], psi)) return null;
-            return [phi, NOT];
+            return cache[node.id] = [phi, NOT];
         }
         case "doubleNegationElimination": {
             if (node.input === null) return null;
@@ -243,7 +247,7 @@ function getNodeOutput(node) {
             if (!output) return null;
             if (output.at(-1) !== NOT) return null;
             if (output[0].at(-1) !== NOT) return null;
-            return output[0][0];
+            return cache[node.id] = output[0][0];
         }
         case "lawOfExcludedMiddle": {
             if (node.input1 === null) return null;
@@ -257,7 +261,7 @@ function getNodeOutput(node) {
             let phi = output1[1];
             if (!postfixEquals(output2[0], psi)) return null;
             if (!postfixEquals(output2[1], [phi, NOT])) return null;
-            return psi;
+            return cache[node.id] = psi;
         }
         case "deMorgansLawParAndOr": {
             if (node.input === null) return null;
@@ -265,7 +269,7 @@ function getNodeOutput(node) {
             if (!output) return null;
             if (output.at(-1) !== NOT) return null;
             if (output[0].at(-1) !== AND) return null;
-            return [[output[0][0], NOT], [output[0][1], NOT], OR];
+            return cache[node.id] = [[output[0][0], NOT], [output[0][1], NOT], OR];
         }
         case "deMorgansLawOrAndPar": {
             if (node.input === null) return null;
@@ -274,7 +278,7 @@ function getNodeOutput(node) {
             if (output.at(-1) !== OR) return null;
             if (output[0].at(-1) !== NOT) return null;
             if (output[1].at(-1) !== NOT) return null;
-            return [[output[0][0], output[1][0], AND], NOT];
+            return cache[node.id] = [[output[0][0], output[1][0], AND], NOT];
         }
         case "deMorgansLawParOrAnd": {
             if (node.input === null) return null;
@@ -282,7 +286,7 @@ function getNodeOutput(node) {
             if (!output) return null;
             if (output.at(-1) !== NOT) return null;
             if (output[0].at(-1) !== OR) return null;
-            return [[output[0][0], NOT], [output[0][1], NOT], AND];
+            return cache[node.id] = [[output[0][0], NOT], [output[0][1], NOT], AND];
         }
         case "deMorgansLawAndOrPar": {
             if (node.input === null) return null;
@@ -291,13 +295,13 @@ function getNodeOutput(node) {
             if (output.at(-1) !== AND) return null;
             if (output[0].at(-1) !== NOT) return null;
             if (output[1].at(-1) !== NOT) return null;
-            return [[output[0][0], output[1][0], OR], NOT];
+            return cache[node.id] = [[output[0][0], output[1][0], OR], NOT];
         }
         case "output": {
             if (getAssumptionsFor(node).length) return null;
             if (node.input === null) return null;
             let output = getNodeOutputTo(nodes[node.input], node);
-            return output;
+            return cache[node.id] = output;
         }
     }
 }

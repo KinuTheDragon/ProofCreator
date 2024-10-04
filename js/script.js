@@ -209,6 +209,7 @@ let arrowStart = null;
 function update() {
     if (mouseIsDown) {
         moveGrabbedNode();
+        cache = {};
     } else {
         grabbedNode = null;
     }
@@ -217,6 +218,7 @@ function update() {
             let hovered = getHoveredNode();
             if (hovered) {
                 connectInput(hovered, arrowStart);
+                cache = {};
             }
             arrowStart = null;
         } else if (mouseLastClickWasShift) {
@@ -224,7 +226,10 @@ function update() {
             if (hovered && hovered.type !== "output") arrowStart = hovered;
         } else grabNode();
     }
-    if (mouseRightClickedThisFrame) deleteNode();
+    if (mouseRightClickedThisFrame) {
+        deleteNode();
+        cache = {};
+    }
     updateProofNode();
     mouseIsDownThisFrame = false;
     mouseRightClickedThisFrame = false;
