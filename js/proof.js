@@ -19,19 +19,7 @@ function getProof() {
             assumptionStack.pop();
             proof.push({type: "dedent"});
         }
-        if (deduction.type === "assumption") {
-            nodeLines[deduction.id] = proofLineNumber++;
-            proof.push({type: "indent"});
-            proof.push({
-                type: "deduction",
-                text: postfixToText(getNodeOutput(deduction)),
-                justification: "AS",
-                lineNumber: nodeLines[deduction.id]
-            });
-            proof.push({type: "separator"});
-            assumptionStack.push(deduction.id);
-            continue;
-        }
+        if (deduction.type === "assumption") continue;
         for (let a of getAssumptionsFor(deduction).toSorted(x => getAssumptionsFor(x).length)) {
             if (assumptionStack.includes(a.id)) continue;
             nodeLines[a.id] = proofLineNumber++;
@@ -54,7 +42,6 @@ function getProof() {
             assumptions: [...assumptionStack]
         });
     }
-    proof = removeExtraneousAssumptions(proof);
     let lastWasDedent = false;
     let spaced = [];
     for (let line of proof) {
@@ -64,17 +51,6 @@ function getProof() {
         lastWasDedent = line.type === "dedent";
     }
     return proof;
-}
-
-function removeExtraneousAssumptions(proof) {
-    let result = [];
-    for (let i = 0; i < proof.length; i++) {
-        if ([0, 1, 2, 3].map(j => proof[i + j]?.type).join(" ") === "indent deduction separator dedent") {
-            i += 3;
-        } else result.push(proof[i]);
-    }
-    if (result.length === proof.length) return result;
-    return removeExtraneousAssumptions(result);
 }
 
 function stringifyProof(proof) {
