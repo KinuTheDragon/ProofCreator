@@ -134,7 +134,7 @@ function getCitationParts(node, nodeLines, currentProof) {
         case "implicationIntroduction":
         case "negationIntroduction":
         case "indirectProof":
-            return getSubproofJustification(node.input, nodeLines, currentProof);
+            return [getSubproofJustification(node.input, nodeLines, currentProof)];
         case "biconditionalIntroduction":
         case "lawOfExcludedMiddle":
             return [getSubproofJustification(node.input1, nodeLines, currentProof),
