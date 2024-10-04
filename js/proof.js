@@ -54,6 +54,7 @@ function getProof() {
             assumptions: [...assumptionStack]
         });
     }
+    proof = removeExtraneousAssumptions(proof);
     let lastWasDedent = false;
     let spaced = [];
     for (let line of proof) {
@@ -62,7 +63,18 @@ function getProof() {
         spaced.push(line);
         lastWasDedent = line.type === "dedent";
     }
-    return spaced;
+    return proof;
+}
+
+function removeExtraneousAssumptions(proof) {
+    let result = [];
+    for (let i = 0; i < proof.length; i++) {
+        if ([0, 1, 2, 3].map(j => proof[i + j]?.type).join(" ") === "indent deduction separator dedent") {
+            i += 3;
+        } else result.push(proof[i]);
+    }
+    if (result.length === proof.length) return result;
+    return removeExtraneousAssumptions(result);
 }
 
 function stringifyProof(proof) {
