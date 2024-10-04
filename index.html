@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Proof Creator</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <h1>Proof Creator (by <a href="https://kinuthedragon.github.io">KinuTheDragon</a>)</h1>
+        Controls: Click and drag to move, shift-click to create an arrow, right-click to remove<br/>
+        Scroll down to see the text proof<br/>
+        <table>
+            <tr>
+                <th>Outline color</th>
+                <td>Black</td>
+                <td>Red</td>
+                <td>Dark red</td>
+                <td>Teal</td>
+                <td>Orange</td>
+            </tr><tr>
+                <th>Meaning</th>
+                <td>Normal</td>
+                <td>Invalid syntax</td>
+                <td>Does not have required inputs</td>
+                <td>Premise</td>
+                <td>Output</td>
+            </tr>
+        </table><br/>
+        <table>
+            <tr>
+                <th>Text</th>
+                <td>~</td>
+                <td>^</td>
+                <td>+</td>
+                <td>&gt;</td>
+                <td>=</td>
+                <td>N/a</td>
+                <td>N/a</td>
+            </tr><tr>
+                <th>Symbol</th>
+                <td>¬</td>
+                <td>∧</td>
+                <td>∨</td>
+                <td>⇒</td>
+                <td>⇔</td>
+                <td>⊥</td>
+                <td>⊳</td>
+            </tr><tr>
+                <th>Name</th>
+                <td>not</td>
+                <td>and</td>
+                <td>or</td>
+                <td>implies</td>
+                <td>if and only if</td>
+                <td>contradiction</td>
+                <td>under the assumption that</td>
+            </tr><tr>
+                <th>Usage</th>
+                <td>¬X</td>
+                <td>X∧Y</td>
+                <td>X∨Y</td>
+                <td>X⇒Y</td>
+                <td>X⇔Y</td>
+                <td>⊥</td>
+                <td>X⊳Y</td>
+            </tr>
+        </table>
+        <button onclick="reset()">Reset</button><br/>
+        <label for="formula">Formula:</label>
+        <input type="text" id="formula"></input><br/>
+        <button onclick="addPremise()">Add premise from formula</button>
+        <button onclick="addAssumption()">Add assumption from formula</button>
+        <button onclick="addUnary('reiteration')">Add reiteration</button><br/>
+        <button onclick="addBinary('conjunctionIntroduction')">Add ∧I</button>
+        <button onclick="addUnary('conjunctionEliminationLeft')">Add ∧E (←)</button>
+        <button onclick="addUnary('conjunctionEliminationRight')">Add ∧E (→)</button><br/>
+        <button onclick="addUnary('implicationIntroduction')">Add ⇒I</button>
+        <button onclick="addBinary('implicationElimination')">Add ⇒E</button>
+        <button onclick="addBinary('biconditionalIntroduction')">Add ⇔I</button>
+        <button onclick="addBinary('biconditionalEliminationLeft')">Add ⇔E (←)</button>
+        <button onclick="addBinary('biconditionalEliminationRight')">Add ⇔E (→)</button><br/>
+        <button onclick="addDisjunctionIntroduction(true)">Add ∨I (←) with formula</button>
+        <button onclick="addDisjunctionIntroduction(false)">Add ∨I (→) with formula</button>
+        <button onclick="addNAry('disjunctionElimination', 3)">Add ∨E</button><br/>
+        <button onclick="addUnary('negationIntroduction')">Add ¬I</button>
+        <button onclick="addBinary('negationElimination')">Add ¬E</button>
+        <button onclick="addUnary('indirectProof')">Add IP</button>
+        <button onclick="addExplosion()">Add X with formula</button><br/>
+        <button onclick="addBinary('disjunctiveSyllogismLeft')">Add DS (←)</button>
+        <button onclick="addBinary('disjunctiveSyllogismRight')">Add DS (→)</button>
+        <button onclick="addBinary('modusTollens')">Add MT</button>
+        <button onclick="addUnary('doubleNegationElimination')">Add DNE</button>
+        <button onclick="addBinary('lawOfExcludedMiddle')">Add LEM</button><br/>
+        <button onclick="addUnary('deMorgansLawParAndOr')">Add DeM ((∧) to ∨)</button>
+        <button onclick="addUnary('deMorgansLawOrAndPar')">Add DeM (∨ to (∧))</button>
+        <button onclick="addUnary('deMorgansLawParOrAnd')">Add DeM ((∨) to ∧)</button>
+        <button onclick="addUnary('deMorgansLawAndOrPar')">Add DeM (∧ to (∨))</button><br/>
+        Input status: <span id="inputStatus"></span><br/>
+        Proof status: <span id="proofStatus"></span><br/>
+        <canvas id="canvas" width="1200" height="800"></canvas><br/>
+        <div id="proof"></div>
+        <script src="js/constants.js"></script>
+        <script src="js/setup.js"></script>
+        <script src="js/utils.js"></script>
+        <script src="js/postfix.js"></script>
+        <script src="js/draw.js"></script>
+        <script src="js/proof.js"></script>
+        <script src="js/script.js"></script>
+    </body>
+</html>
