@@ -36,11 +36,11 @@ function connectsToAssumption(node) {
     } else {
         let i = 1;
         while (node["input" + i] !== undefined) {
-            if (node["input" + i] === null) {
+            let otherNode = nodes[node["input" + i]];
+            if (!otherNode) {
                 i++;
                 continue;
             }
-            let otherNode = nodes[node["input" + i]];
             if (otherNode.type === "assumption" && !getAssumptionsFor(node).some(x => x && x.id === otherNode.id))
                 return true;
             i++;
