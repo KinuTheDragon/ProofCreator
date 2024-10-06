@@ -36,7 +36,7 @@ function connectsToAssumption(node) {
     } else {
         let i = 1;
         while (node["input" + i] !== undefined) {
-            if (node["input" + i] !== null) {
+            if (node["input" + i] === null) {
                 i++;
                 continue;
             }
