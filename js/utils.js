@@ -30,14 +30,18 @@ function intersectsAssumption(node) {
 }
 
 function connectsToAssumption(node) {
-    if (node.input !== undefined) {
-        if (nodes[node.input].type === "assumption" && !getAssumptionsFor(node).some(x => x.id === node.input))
+    if (node.input !== undefined && node.input !== null) {
+        if (nodes[node.input].type === "assumption" && !getAssumptionsFor(node).some(x => x && x.id === node.input))
             return true;
     } else {
         let i = 1;
         while (node["input" + i] !== undefined) {
+            if (node["input" + i] !== null) {
+                i++;
+                continue;
+            }
             let otherNode = nodes[node["input" + i]];
-            if (otherNode.type === "assumption" && !getAssumptionsFor(node).some(x => x.id === otherNode.id))
+            if (otherNode.type === "assumption" && !getAssumptionsFor(node).some(x => x && x.id === otherNode.id))
                 return true;
             i++;
         }
