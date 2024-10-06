@@ -73,7 +73,9 @@ function drawTextNode(node, outlineColor) {
     let labels = LABELS[node.type];
     let isOutput = node.type === "output";
     ctx.strokeStyle = outlineColor;
-    if (intersectsAssumption(node) || (["premise", "output"].includes(node.type) && getAssumptionsFor(node).length))
+    if (intersectsAssumption(node) ||
+        (["premise", "output"].includes(node.type) && getAssumptionsFor(node).length) ||
+        connectsToAssumption(node))
         ctx.strokeStyle = "#f00";
     else if (node.type !== "output" && !getNodeOutput(node))
         ctx.strokeStyle = "#800";

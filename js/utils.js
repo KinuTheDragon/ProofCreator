@@ -29,6 +29,21 @@ function intersectsAssumption(node) {
     return nodes.some(x => x && x.type === "assumption" && nodesIntersect(node, x));
 }
 
+function connectsToAssumption(node) {
+    if (node.input !== undefined) {
+        if (nodes[node.input].type === "assumption" && !getAssumptionsFor(node).some(x => x.id === node.input))
+            return true;
+    } else {
+        let i = 1;
+        while (node["input" + i] !== undefined) {
+            let otherNode = nodes[node["input" + i]];
+            if (otherNode.type === "assumption" && !getAssumptionsFor(node).some(x => x.id === otherNode.id))
+                return true;
+            i++;
+        }
+    }
+}
+
 function getInputs(node) {
     if (!node) return [];
     let inputs = [];
@@ -66,7 +81,7 @@ function getNodeOutputTo(from, to) {
 let cache = {};
 function getNodeOutput(node) {
     if (cache[node.id]) return cache[node.id];
-    if (isLoop(node)) return cache[node.id] = null;
+    if (isLoop(node) || connectsToAssumption(node)) return cache[node.id] = null;
     switch (node.type) {
         case "premise":
         case "assumption":
@@ -425,6 +440,8 @@ function getNewProofStatus() {
         return "Output has assumption operator";
     if (nodes.some(x => x && intersectsAssumption(x)))
         return "Intersecting with assumption";
+    if (nodes.some(x => x && connectsToAssumption(x)))
+        return "Connecting directly to assumption (use reiteration)";
     if (nodes.some(x => x && x.type === "output" && !getNodeOutput(x)))
         return "Invalid proof";
     return "Valid!";
@@ -437,6 +454,7 @@ function isValidProof() {
     if (nodes.some(x => x && intersectsAssumption(x))) return false;
     if (nodes.some(x => x && x.type === "premise" && getAssumptionsFor(x).length)) return false;
     if (nodes.some(x => x && x.type === "output" && getAssumptionsFor(x).length)) return false;
+    if (nodes.some(x => x && connectsToAssumption(x))) return false;
     if (nodes.some(x => x &&
                         x.type === "output" &&
                         getNodeOutput(x) &&
