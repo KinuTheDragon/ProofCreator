@@ -13,25 +13,35 @@ function getProof() {
         });
     }
     proof.push({type: "separator"});
-    let assumptionStack = [];
+    let currentAssumptions = [];
     for (let deduction of getDeductions()) {
-        while (assumptionStack.length && !nodeIsInside(nodes[assumptionStack.at(-1)], deduction)) {
-            assumptionStack.pop();
-            proof.push({type: "dedent"});
-        }
         if (deduction.type === "assumption") continue;
-        for (let a of getAssumptionsFor(deduction).toSorted(x => getAssumptionsFor(x).length)) {
-            if (assumptionStack.includes(a.id)) continue;
-            nodeLines[a.id] = proofLineNumber++;
-            proof.push({type: "indent"});
-            proof.push({
-                type: "deduction",
-                text: postfixToText(getNodeOutput(a)),
-                justification: "AS",
-                lineNumber: nodeLines[a.id]
-            });
-            proof.push({type: "separator"});
-            assumptionStack.push(a.id);
+        let newAssumptions = getAssumptionsFor(deduction).toSorted((a, b) => getAssumptionsFor(a).length - getAssumptionsFor(b).length);
+        if (currentAssumptions.length !== newAssumptions.length ||
+            newAssumptions.some((x, i) => currentAssumptions[i] !== x.id)) {
+            let lastInCommon;
+            for (let i = 0; i < currentAssumptions.length; i++) {
+                if (i >= newAssumptions.length || currentAssumptions[i] !== newAssumptions[i].id) {
+                    lastInCommon = i - 1;
+                    break;
+                }
+            }
+            while (currentAssumptions[lastInCommon + 1] !== undefined) {
+                currentAssumptions.pop();
+                proof.push({type: "dedent"});
+            }
+            for (let a of newAssumptions.slice(lastInCommon + 1)) {
+                nodeLines[a.id] = proofLineNumber++;
+                proof.push({type: "indent"});
+                proof.push({
+                    type: "deduction",
+                    text: postfixToText(getNodeOutput(a)),
+                    justification: "AS",
+                    lineNumber: nodeLines[a.id]
+                });
+                proof.push({type: "separator"});
+                currentAssumptions.push(a.id);
+            }
         }
         nodeLines[deduction.id] = proofLineNumber++;
         proof.push({
@@ -39,7 +49,7 @@ function getProof() {
             text: postfixToText(getNodeOutput(deduction)),
             justification: JUSTIFICATIONS[deduction.type] + ", " + getCitation(deduction, nodeLines, [...proof]),
             lineNumber: nodeLines[deduction.id],
-            assumptions: [...assumptionStack]
+            assumptions: [...currentAssumptions]
         });
     }
     let lastWasDedent = false;
