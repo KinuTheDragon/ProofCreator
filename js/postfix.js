@@ -46,16 +46,17 @@ function postfixToText(postfix) {
     if (!postfix || typeof postfix !== "object") return postfix;
     let operator = postfix.at(-1);
     if (operator === NOT) {
-        return NOT + parenthesizeArgument(postfixToText(postfix[0]));
+        return NOT + parenthesizeArgument(postfix[0]);
     } else {
-        return parenthesizeArgument(postfixToText(postfix[0])) + operator + parenthesizeArgument(postfixToText(postfix[1]));
+        return parenthesizeArgument(postfix[0]) + operator + parenthesizeArgument(postfix[1]);
     }
 }
 
 function parenthesizeArgument(arg) {
-    if (!arg) return arg;
-    if (BINARY_OPERATORS.some(x => arg.includes(x))) arg = "(" + arg + ")";
-    return arg;
+    let text = postfixToText(arg);
+    if (typeof arg !== "object") return text;
+    if (BINARY_OPERATORS.includes(arg.at(-1))) text = "(" + text + ")";
+    return text;
 }
 
 function postfixEquals(postfix1, postfix2) {
