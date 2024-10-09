@@ -60,8 +60,8 @@ function parenthesizeArgument(arg) {
 }
 
 function postfixEquals(postfix1, postfix2) {
-    let isObj1 = typeof postfix1 === "object";
-    let isObj2 = typeof postfix2 === "object";
+    let isObj1 = typeof postfix1 === "object" && !!postfix1;
+    let isObj2 = typeof postfix2 === "object" && !!postfix2;
     if (isObj1 !== isObj2) return false;
     if (!isObj1) return postfix1 === postfix2;
     if (postfix1.length !== postfix2.length) return false;
