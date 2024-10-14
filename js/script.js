@@ -10,6 +10,7 @@ function reset() {
     ];
     grabbedNode = null;
     arrowStart = null;
+    cache = {};
     setInputStatus("OK");
 }
 
