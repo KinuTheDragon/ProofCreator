@@ -20,7 +20,7 @@ const FORK = "├";
 
 const BINARY_OPERATORS = [AND, OR, IMPLIES, BICONDITIONAL, ASSUMING];
 
-const UPSCALE = 10;
+const UPSCALE = 2;
 
 const LINE_WIDTH = 2.5;
 const FONT_SIZE = 16;
